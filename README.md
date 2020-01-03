@@ -1,2 +1,2 @@
-# -Encryption
-暗号技術の実装
+# Encryption
+古典暗号の勉強のためにPythonで実装していく。
