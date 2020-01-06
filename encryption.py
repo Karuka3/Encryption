@@ -1,9 +1,11 @@
 import random
 import string
+import sys
+import itertools
 
 
 class Caesar:
-    def __init__(self, text="DeMO", key=3):
+    def __init__(self, text="This is a test encryption", key=3):
         self.text = text
         self.key = self.keygen(key)
 
@@ -92,8 +94,55 @@ class Skytale:
             print("This text may not be Skytale encryption, because the number of characters in the text is a prime number.")
 
 
+class Transposition:
+    def __init__(self, text="This is a test encryption", key=3, random_state=21):
+        random.seed(random_state)
+        self.text = text
+        self.length = len(text)
+        self.key, self.tau = self.keygen(key)
+
+    def keygen(self, key):
+        if key <= self.length:
+            tau = list(range(key))
+            random.shuffle(tau)
+            return key, tau
+        else:
+            print("ValueError! The key value is invalid. The key value is more than the number of characters in the text.")
+            sys.exit()
+
+    def encording(self):
+        chiper = ""
+        plain = self.text
+        blocks = [plain[i: i+self.key]
+                  for i in range(0, self.length, self.key)]
+        for block in blocks:
+            if len(block) != self.key:
+                chiper += block
+            else:
+                for loc in self.tau:
+                    chiper += block[loc]
+        return chiper
+
+    def decording(self):
+        plain = self.encording()
+        return plain
+
+    def attack(self):
+        for key in range(2, self.length):
+            order = list(range(key))
+            self.key = key
+            print("Key:{}".format(self.key))
+            for tau in itertools.permutations(order):
+                self.tau = tau
+                plain = self.decording()
+                print("\t" + plain)
+
+
 def test():
-    s = Skytale(text="HolheWdoloXBlrnp", key=4)
+    s = Transposition(text="I love", key=3)
+    tt = s.encording()
+    s.text = tt
+    print(tt)
     s.attack()
 
 
