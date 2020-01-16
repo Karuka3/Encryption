@@ -2,6 +2,7 @@ import random
 import string
 import sys
 import itertools
+import pandas as pd
 
 
 class Caesar:
@@ -138,12 +139,97 @@ class Transposition:
                 print("\t" + plain)
 
 
+class Substitution:
+    def __init__(self, text="This is a test encryption", key=3, mode="single"):
+        self.text = text.replace(' ', '')
+        self.key, self.sigma = self.keygen(key, mode)
+        self.length = len(text)
+
+    def keygen(self, key, mode):
+        random.seed(key)
+        self.mode = mode
+        sigma = {}
+        letters = ''.join(random.sample(string.ascii_letters, 52))
+        if self.mode == "single":
+            for i, j in zip(string.ascii_letters, letters):
+                sigma[i] = j
+        elif self.mode == "multi":
+            multi_letters = []
+            for n in range(52):
+                multi_letters.append(
+                    ''.join(random.choices(string.ascii_letters, k=key)))
+            for i, j in zip(string.ascii_letters, multi_letters):
+                sigma[i] = j
+        return key, sigma
+
+    def encording(self):
+        chiper = ""
+        plain = self.text
+        for i in plain:
+            chiper += self.sigma[i]
+        return chiper
+
+    def decording(self):
+        plain = ""
+        chiper = self.text
+        if self.mode == "single":
+            for i in chiper:
+                for key, value in self.sigma.items():
+                    if value == i:
+                        plain += key
+                        break
+        elif self.mode == "multi":
+            blocks = [chiper[i: i+self.key]
+                      for i in range(0, len(chiper), self.key)]
+            for i in blocks:
+                for key, value in self.sigma.items():
+                    if value == i:
+                        plain += key
+                        break
+        return plain
+
+
+class Vigenere:
+    def __init__(self, text="This is a test encryption", key="TEST"):
+        self.table = self.tablegen()
+        self.text = text.lower().replace(' ', '')
+        self.key = self.keygen(key)
+
+    def tablegen(self):
+        self.lower = string.ascii_lowercase
+        self.upper = string.ascii_uppercase
+        table = []
+        for i in range(26):
+            table.append(self.lower)
+            self.lower = self.lower[1:] + self.lower[0]
+        return table
+
+    def keygen(self, key):
+        return key
+
+    def encording(self):
+        chiper = ""
+        plain = self.text
+        for i, m in enumerate(plain):
+            k = self.key[i % len(self.key)]
+            chiper += self.table[self.upper.index(k)][self.lower.index(m)]
+        return chiper
+
+    def decording(self):
+        plain = ""
+        chiper = self.text
+        for i, c in enumerate(chiper):
+            k = self.key[i % len(self.key)]
+            plain += self.lower[self.table[self.upper.index(k)].index(c)]
+        return plain
+
+
 def test():
-    s = Transposition(text="I love", key=3)
+    s = Vigenere(text="I love you")
     tt = s.encording()
     s.text = tt
     print(tt)
-    s.attack()
+    print(s.decording())
 
 
 if __name__ == "__main__":
